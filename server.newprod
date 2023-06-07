@@ -1,0 +1,55 @@
+var agent = require('@sixthsense/sixthsense-node-js').default;
+agent.start({
+   serviceName: 'eComm-Angular-Backend',
+   directServers: 'prod-grpc.35.200.202.61.sslip.io:443',
+   collectorAddress: 'prod-grpc.35.200.202.61.sslip.io:443',
+   enableLogs: true,
+   caPath: true,
+   authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZWFtSWQiOiIyMzJjZGRmNS1jMDc2LTQwOGUtYjgzNS04MzBlOWY5NWYyM2IiLCJiaWxsaW5nX2lkIjoiOGU5MTEwMDctMWUwYS00MTdmLTg2YjMtMzkwMWJiZTkzOTBlIiwiaWF0IjoxNjI0ODgyMzI3LCJhdWQiOiJvYXAiLCJpc3MiOiJzaXh0aC1zZW5zLWF1dGgifQ.K7NTkytxskBh4JZ3tMIfBVhicuaBITMyVHO4RYrylzE'
+});
+const bodyParser = require('body-parser');
+const express = require('express');
+const pino = require('pino');
+const expPino = require('express-pino-logger');
+const sleep = require('system-sleep');
+const cors = require('cors');
+
+
+const logger = pino({
+  level: 'info',
+  prettyPrint: false,
+  useLevelLabels: true,
+});
+const expLogger = expPino({
+  logger: logger,
+});
+
+
+const app = express();
+
+app.use(expLogger);
+const corsOpts = {
+  origin: '*',
+
+  methods: ['GET', 'POST'],
+
+};
+
+app.use(cors(corsOpts));
+app.use((req, res, next) => {
+  res.set('Timing-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Origin', '*');
+  next();
+});
+
+
+app.post('/api/v1/user/fail', (req, res) => {
+  res.status(500).send('Working');
+});
+
+// fire it up!
+const port = process.env.USER_SERVER_PORT || '8080';
+app.listen(port, () => {
+  logger.info('Started on port', port);
+});
+
